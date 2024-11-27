@@ -24,8 +24,12 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
         implementation("org.springframework.boot:spring-boot-starter-validation")
 
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        // implementation(platform("aws.sdk.kotlin:bom:1.3.82"))
         implementation(platform("software.amazon.awssdk:bom:2.21.20"))
+        implementation("org.jetbrains.kotlin:kotlin-reflect")
+        implementation("com.thedeanda:lorem:2.2") // For general use
+
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation(kotlin("test"))
     }
 
@@ -35,4 +39,7 @@ allprojects {
     kotlin {
         jvmToolchain(17)
     }
+}
+dependencies {
+    implementation(kotlin("reflect"))
 }
