@@ -1,4 +1,4 @@
-package com.aws.demo.dynamodb
+package com.aws.demo.s3
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -9,8 +9,8 @@ val <T : Any> T.logger: Logger
     get() = LoggerFactory.getLogger(this::class.java)
 
 @SpringBootApplication(scanBasePackages = ["com.aws.demo"])
-class DynamodbDemoApplication
+class S3DemoApplication
 
 fun main(args: Array<String>) {
-    runApplication<DynamodbDemoApplication>(*args)
+    runApplication<S3DemoApplication>(*args)
 }

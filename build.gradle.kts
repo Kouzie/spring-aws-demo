@@ -26,6 +26,7 @@ allprojects {
 
         // implementation(platform("aws.sdk.kotlin:bom:1.3.82"))
         implementation(platform("software.amazon.awssdk:bom:2.21.20"))
+        implementation("software.amazon.awssdk:auth")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("com.thedeanda:lorem:2.2") // For general use
 
@@ -40,6 +41,22 @@ allprojects {
         jvmToolchain(17)
     }
 }
+
+listOf(
+    "dynamodb-demo",
+    "lambda-demo",
+    "s3-demo",
+    "sqs-demo",
+    "systemmanager-demo"
+).forEach{ projectName ->
+    project(":$projectName") {
+        dependencies {
+            implementation(project(":aws-credential"))
+
+        }
+    }
+}
+
 dependencies {
     implementation(kotlin("reflect"))
 }

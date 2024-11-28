@@ -19,5 +19,10 @@ pluginManagement {
 rootProject.name = "spring-aws-demo"
 
 include(
-    "dynamodb-demo"
+    "aws-credential",
+    "dynamodb-demo",
+    "s3-demo",
+    "sqs-demo",
+    "lambda-demo",
+    "systemmanager-demo",
 )
