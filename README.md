@@ -14,7 +14,10 @@ LocalStack Desktop 혹은 아래 브라우저 기반 사이트에서 localhost �
 > <https://app.localstack.cloud/inst/default/resources>
 > 회원가입 필수
 
+## CLI 툴
+
 ```shell
+pip install awscli-local
 awslocal configure
 AWS Access Key ID [None]: test-access-key
 AWS Secret Access Key [None]: test-secret-key
