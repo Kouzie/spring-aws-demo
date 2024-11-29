@@ -3,6 +3,8 @@ pluginManagement {
     val kotlinSpringVersion: String by settings
     val springBootVersion: String by settings
     val dependencyManagementVersion: String by settings
+    val springCloudAwsVersion: String by settings
+    val softwareAwsSdkBomVersion: String by settings
     plugins {
         kotlin("jvm") version kotlinJvmVersion
         kotlin("plugin.spring") version kotlinSpringVersion

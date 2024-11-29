@@ -11,6 +11,11 @@ import java.net.URI
 @Configuration
 class S3Config {
 
+    companion object {
+        const val S3_URL: String = "http://localhost:4566"
+
+    }
+
     /**
      * 실행후 아래 명령어 수행
      * awslocal s3api get-bucket-lifecycle-configuration --bucket demo-bucket
@@ -18,7 +23,7 @@ class S3Config {
     @Bean
     fun s3Client(credentialsProvider: AwsCredentialsProvider): S3Client {
         return S3Client.builder()
-            .endpointOverride(URI.create("http://localhost:4566")) // LocalStack 엔드포인트
+            .endpointOverride(URI.create(S3_URL)) // LocalStack 엔드포인트
             .credentialsProvider(credentialsProvider)
             .region(Region.US_EAST_1)
             .serviceConfiguration(
