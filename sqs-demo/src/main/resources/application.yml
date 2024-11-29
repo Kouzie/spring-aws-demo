@@ -1,0 +1,8 @@
+spring:
+  profiles:
+#    active: "cloud"
+    active: "library"
+demo:
+  aws:
+    sqs:
+      queue-name: "demo-queue"
