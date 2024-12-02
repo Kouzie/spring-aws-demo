@@ -24,6 +24,7 @@ allprojects {
     }
 
     dependencies {
+        implementation(kotlin("reflect"))
         implementation("org.springframework.boot:spring-boot-starter-web")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
         implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -52,16 +53,11 @@ listOf(
     "lambda-demo",
     "s3-demo",
     "sqs-demo",
-    "systemmanager-demo"
+    "paramstore-demo"
 ).forEach { projectName ->
     project(":$projectName") {
         dependencies {
             implementation(project(":aws-credential"))
-
         }
     }
-}
-
-dependencies {
-    implementation(kotlin("reflect"))
 }
