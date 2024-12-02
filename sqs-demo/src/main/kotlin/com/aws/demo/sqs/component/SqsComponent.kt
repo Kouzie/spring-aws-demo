@@ -32,9 +32,10 @@ class SqsComponent(
                 .queueName(queueName)
                 .build()
 
-            var response = sqsClient.createQueue(createQueueRequest);
+            val response: CreateQueueResponse = sqsClient.createQueue(createQueueRequest);
             queueUrl = response.queueUrl()
         }
+        logger.info("connect queue url success, $queueUrl")
     }
 
     private fun deleteMessage(receiptHandle: String) {
