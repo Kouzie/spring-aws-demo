@@ -1,25 +1,24 @@
 package com.aws.demo.dynamodb.mapper
 
+import com.aws.demo.dynamodb.dto.CustomerDetailDto
 import com.aws.demo.dynamodb.dto.CustomerDto
 import com.aws.demo.dynamodb.dto.req.CustomerAddRequest
 import com.aws.demo.dynamodb.entity.CustomerEntity
+import com.aws.demo.dynamodb.entity.CustomerInfoEntity
 import org.springframework.stereotype.Component
 import java.time.Instant
-import java.util.*
 
 @Component
 class CustomerMapper {
 
-    fun toEntity(request: CustomerAddRequest): CustomerEntity {
+    fun toEntity(request: CustomerAddRequest, customerId: String, now: Instant): CustomerEntity {
         return request.run {
-            var now = Instant.now()
             CustomerEntity(
-                pk = "CUSTOMER#${UUID.randomUUID()}",
-                sk = "CUSTOMER#${UUID.randomUUID()}",
+                pk = "CUSTOMER#${customerId}",
+                sk = "CUSTOMER#${customerId}",
                 type = "CUSTOMER",
-                name = name,
-                age = age,
-                email = email,
+                username = username,
+                password = password,
                 expired = -1,
                 created = now,
                 updated = now
@@ -27,15 +26,47 @@ class CustomerMapper {
         }
     }
 
+    fun toCustomerInfoEntity(request: CustomerAddRequest, customerId: String, now: Instant): CustomerInfoEntity {
+        return request.run {
+            CustomerInfoEntity(
+                pk = "CUSTOMER#${customerId}",
+                sk = "CUSTOMER_INFO#${customerId}",
+                type = "CUSTOMER_INFO",
+                age = age,
+                email = email,
+                nickname = nickname,
+                intro = intro,
+                expired = -1,
+                updated = now,
+                created = now,
+            )
+        }
+    }
+
     fun toDto(entity: CustomerEntity): CustomerDto {
-        val dto = CustomerDto(
+        return entity.run {
+            CustomerDto(
+                customerId = pk.split("#")[1],
+                username = username,
+                expired = expired,
+                updated = updated,
+                created = created,
+            )
+        }
+    }
+
+    fun toDetailDto(entity: CustomerEntity, customerInfoEntity: CustomerInfoEntity): CustomerDetailDto {
+        val dto = CustomerDetailDto(
             customerId = entity.pk.split("#")[1],
-            name = entity.name,
-            age = entity.age,
-            email = entity.email,
+            username = entity.username,
+            password = entity.password,
+            nickname = customerInfoEntity.nickname,
+            intro = customerInfoEntity.intro,
+            age = customerInfoEntity.age,
+            email = customerInfoEntity.email,
             expired = entity.expired,
-            created = entity.created.toString(),
-            updated = entity.updated.toString(),
+            updated = entity.updated,
+            created = entity.created,
         )
         return dto;
     }

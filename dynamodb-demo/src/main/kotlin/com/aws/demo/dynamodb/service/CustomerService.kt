@@ -1,44 +1,77 @@
 package com.aws.demo.dynamodb.service
 
 import com.aws.demo.dynamodb.config.DynamodbComponent
-import com.aws.demo.dynamodb.dto.req.CustomerAddRequest
+import com.aws.demo.dynamodb.dto.CustomerDetailDto
 import com.aws.demo.dynamodb.dto.CustomerDto
+import com.aws.demo.dynamodb.dto.req.CustomerAddRequest
 import com.aws.demo.dynamodb.entity.CustomerEntity
+import com.aws.demo.dynamodb.entity.CustomerInfoEntity
+import com.aws.demo.dynamodb.entity.CustomerOrderEntity
 import com.aws.demo.dynamodb.mapper.CustomerMapper
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
-import software.amazon.awssdk.enhanced.dynamodb.Expression
-import software.amazon.awssdk.enhanced.dynamodb.Key
-import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
-import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
+import software.amazon.awssdk.enhanced.dynamodb.*
+import software.amazon.awssdk.enhanced.dynamodb.model.*
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import java.time.OffsetDateTime
+import java.time.Instant
+import java.util.*
+
 
 @Service
 class CustomerService(
     private val dynamodbComponent: DynamodbComponent,
+    private val enhancedClient: DynamoDbEnhancedClient,
     private val mapper: CustomerMapper,
 ) : ApplicationListener<ApplicationStartedEvent> {
-    private lateinit var table: DynamoDbTable<CustomerEntity>
+    private lateinit var customerTable: DynamoDbTable<CustomerEntity>
+    private lateinit var customerOrderTable: DynamoDbTable<CustomerOrderEntity>
+    private lateinit var customerInfoTable: DynamoDbTable<CustomerInfoEntity>
 
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
-        table = dynamodbComponent.generateDynamoDbTable(CustomerEntity::class)
+        customerTable = dynamodbComponent.generateDynamoDbTable(CustomerEntity::class)
+        customerOrderTable = dynamodbComponent.generateDynamoDbTable(CustomerOrderEntity::class)
+        customerInfoTable = dynamodbComponent.generateDynamoDbTable(CustomerInfoEntity::class)
     }
 
-    fun create(request: CustomerAddRequest): CustomerDto {
-        val entity = mapper.toEntity(request)
-        table.putItem(entity)
-        return mapper.toDto(entity)
+    fun create(request: CustomerAddRequest): CustomerDetailDto {
+        val customerId = UUID.randomUUID().toString()
+        val now = Instant.now()
+        val customerEntity = mapper.toEntity(request, customerId, now)
+        val customerInfoEntity = mapper.toCustomerInfoEntity(request, customerId, now)
+        enhancedClient.transactWriteItems(
+            TransactWriteItemsEnhancedRequest.builder()
+                .addPutItem(customerTable, customerEntity)
+                .addPutItem(customerInfoTable, customerInfoEntity)
+                .build()
+        )
+
+        return mapper.toDetailDto(customerEntity, customerInfoEntity)
     }
 
-    fun getById(customerId: String): CustomerDto {
+    fun getById(customerId: String): CustomerDetailDto {
         val pk = "CUSTOMER#${customerId}"
-        var key: Key = Key.builder().partitionValue(pk).build()
-        var entity: CustomerEntity = table.getItem(key)
-        return mapper.toDto(entity)
+        val infoSk = "CUSTOMER_INFO#${customerId}"
+        val customerRead: ReadBatch = ReadBatch.builder(CustomerEntity::class.java)
+            .mappedTableResource(customerTable)
+            .addGetItem(Key.builder().partitionValue(pk).sortValue(pk).build())
+            .build()
+
+        val customerInfoRead: ReadBatch = ReadBatch.builder(CustomerInfoEntity::class.java)
+            .mappedTableResource(customerInfoTable)
+            .addGetItem(Key.builder().partitionValue(pk).sortValue(infoSk).build())
+            .build()
+
+        val resultPages = enhancedClient.batchGetItem(
+            BatchGetItemEnhancedRequest.builder()
+                .readBatches(customerRead, customerInfoRead)
+                .build()
+        )
+
+        val entity: CustomerEntity = resultPages.resultsForTable(customerTable).first() // null point 예외 발생 가능
+        val customerInfoEntity: CustomerInfoEntity = resultPages.resultsForTable(customerInfoTable).first()
+
+        return mapper.toDetailDto(entity, customerInfoEntity)
     }
 
     /**
@@ -49,8 +82,8 @@ class CustomerService(
      *
      * */
     fun getByCreateTimeBetween(
-        startTime: Long,
-        endTime: Long
+        startTime: Instant,
+        endTime: Instant,
     ): List<CustomerDto> {
         val scanRequest = ScanEnhancedRequest.builder()
             .filterExpression(
@@ -58,14 +91,14 @@ class CustomerService(
                     .expression("created BETWEEN :startTime AND :endTime")
                     .expressionValues(
                         mapOf(
-                            ":startTime" to AttributeValue.builder().s("TIMESTAMP#$startTime").build(),
-                            ":endTime" to AttributeValue.builder().s("TIMESTAMP#$endTime").build()
+                            ":startTime" to AttributeValue.builder().s(startTime.toString()).build(),
+                            ":endTime" to AttributeValue.builder().s(endTime.toString()).build()
                         )
                     )
                     .build()
             )
             .build()
-        val result = table.scan(scanRequest)
+        val result: PageIterable<CustomerEntity> = customerTable.scan(scanRequest)
         return result.items().map { mapper.toDto(it) }
     }
 }

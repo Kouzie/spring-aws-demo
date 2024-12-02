@@ -37,9 +37,12 @@ class InitComponent(
         val customers = (1..10).map {
             customerService.create(
                 CustomerAddRequest(
-                    name = lorem.getName(), // Random customer name
+                    username = lorem.getWords(10),
+                    password = lorem.getWords(18),
+                    nickname = lorem.name,
+                    intro = lorem.getWords(10, 20),
                     age = (18..60).random(), // Random age between 18 and 60
-                    email = lorem.getEmail() // Random email
+                    email = lorem.getEmail(), // Random email
                 )
             )
         }

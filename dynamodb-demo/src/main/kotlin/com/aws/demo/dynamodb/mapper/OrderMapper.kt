@@ -3,6 +3,7 @@ package com.aws.demo.dynamodb.mapper
 import com.aws.demo.dynamodb.dto.OrderDto
 import com.aws.demo.dynamodb.dto.OrderItemDto
 import com.aws.demo.dynamodb.dto.req.OrderAddRequest
+import com.aws.demo.dynamodb.entity.CustomerOrderEntity
 import com.aws.demo.dynamodb.entity.OrderEntity
 import com.aws.demo.dynamodb.entity.OrderItem
 import org.springframework.stereotype.Component
@@ -17,11 +18,21 @@ class OrderMapper {
                 sk = "TIMESTAMP#${System.currentTimeMillis()}",
                 type = "ORDER",
                 customerId = request.customerId,
-                amount = request.orderItem.sumOf { item -> item.price },
+                amount = request.getAmount(),
                 orderItems = request.orderItem.map { req -> OrderItem(price = req.price, productId = req.productId) },
                 expired = -1,
             )
         }
+    }
+
+    fun toCustomerOrderEntity(request: OrderAddRequest, orderId: String): CustomerOrderEntity {
+        return CustomerOrderEntity(
+            pk = "CUSTOMER#${request.customerId}",
+            sk = "ORDER#${System.currentTimeMillis()}#${orderId}",
+            type = "CUSTOMER_ORDER",
+            amount = request.getAmount(), // // 결제금액
+            title = "temp title", // // 주문제목 ex: 삼다수 외 1건
+        )
     }
 
     fun toDto(entity: OrderEntity): OrderDto {
