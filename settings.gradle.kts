@@ -26,5 +26,5 @@ include(
     "s3-demo",
     "sqs-demo",
     "lambda-demo",
-    "systemmanager-demo",
+    "paramstore-demo",
 )

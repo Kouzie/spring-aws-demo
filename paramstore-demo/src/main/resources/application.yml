@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: param-demo
+  profiles:
+    active: paramstore
+demo:
+  properties:
+    id: ${DEMO_PROPERTIES_ID:default_id}
+    key: ${DEMO_PROPERTIES_KEY:default_key}
+    url: ${DEMO_PROPERTIES_URL:default_url}
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+DEMO_PROPERTIES_ID: dev_id
+DEMO_PROPERTIES_KEY: dev_key
+DEMO_PROPERTIES_URL: dev_url
+---
+spring:
+  config:
+    activate:
+      on-profile: paramstore
+    import: 'optional:aws-parameterstore:/demo/param/'
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        secret-key: test-access-key
+        access-key: test-secret-key
+      parameterstore:
+        enabled: true
+        endpoint: http://localhost:4566
