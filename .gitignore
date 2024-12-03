@@ -45,3 +45,4 @@ bin/
 .idea/uiDesigner.xml
 .idea/vcs.xml
 /volume
+/lambda-demo/my-lambda/node_modules

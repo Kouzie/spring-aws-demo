@@ -35,6 +35,8 @@ class SqsComponent(
             val response: CreateQueueResponse = sqsClient.createQueue(createQueueRequest);
             queueUrl = response.queueUrl()
         }
+        // connect queue url success, http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/demo-queue
+        // 000000000000: account id
         logger.info("connect queue url success, $queueUrl")
     }
 
