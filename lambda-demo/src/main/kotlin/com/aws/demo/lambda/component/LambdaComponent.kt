@@ -17,6 +17,15 @@ class LambdaComponent(
     val objectMapper: ObjectMapper = ObjectMapper(),
 ) {
 
+    /**
+     * @param functionName 등록한 함수명
+     * @param payload lambda 에 전달할 페이로드
+     * @param type 호출 타입
+     *  Event: 비동기
+     *  RequestResponse: 동기
+     *  DryRun: 테스트호출, 실행하지 않고 request 가 유효한지만 확인
+     *
+     * */
     fun invokeLambda(functionName: String, payload: String, type: InvocationType): String {
         var request = InvokeRequest.builder()
             .invocationType(type)

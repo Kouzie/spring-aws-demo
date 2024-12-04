@@ -39,14 +39,4 @@ class SqsComponent(
         // 000000000000: account id
         logger.info("connect queue url success, $queueUrl")
     }
-
-    private fun deleteMessage(receiptHandle: String) {
-        val deleteMessageRequest = DeleteMessageRequest.builder()
-            .queueUrl(queueUrl)
-            .receiptHandle(receiptHandle)
-            .build()
-
-        sqsClient.deleteMessage(deleteMessageRequest)
-        println("Message deleted.")
-    }
 }

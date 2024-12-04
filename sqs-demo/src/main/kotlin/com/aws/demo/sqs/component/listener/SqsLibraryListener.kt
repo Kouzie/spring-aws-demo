@@ -20,13 +20,11 @@ class SqsLibraryListener(
     private val sqsComponent: SqsComponent,
     private val sqsClient: SqsClient,
 ) {
-    @Value("\${sqs.polling.threads:5}")
-    private lateinit var concurrentCount: String
     private var running = true // 작업 실행 상태 플래그
 
     companion object {
-        val maxNumberOfMessages = 10;
-        val waitTimeSeconds = 10;
+        const val maxNumberOfMessages = 10;
+        const val waitTimeSeconds = 10;
     }
 
     /**
@@ -54,17 +52,6 @@ class SqsLibraryListener(
         pollMessageScope.launch {
             while (running) { // 공통 루프에서 관리
                 pollMessages()
-                /*var jobs: List<Job> = List(coroutineCount) { workerId ->
-                    launch {
-                        try {
-                            pollMessages(workerId)
-                        } catch (e: Exception) {
-                            logger.info("Worker-$workerId encountered an error: ${e.message}")
-                            delay(1000L) // 에러 발생 시 잠시 대기
-                        }
-                    }
-                }
-                jobs.joinAll()*/
             }
         }
     }
